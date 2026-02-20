@@ -324,6 +324,24 @@
       pointer-events:none;
       z-index:40;
     }
+    .final-photo{
+  width: min(420px, 100%);
+  margin: 14px auto 0;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 18px 60px rgba(0,0,0,.45);
+  overflow: hidden;
+}
+.final-photo img{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.final-caption{
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
   </style>
 </head>
 
@@ -676,11 +694,16 @@
     spawnConfetti(220);
 
     finalText.innerHTML = `
-      Score dyalk : <b>${score}/${QUESTIONS.length}</b> 🥳<br><br>
-      <b>Joyeux anniversaire mon amour 🎂❤️</b><br>
-      Kanmtanna lik 3am kbir b lkhir, lfar7a w réussite…<br>
-      <span style="color:var(--accent2)"><b>كنبغيك safaaaaaaaaaaaaa fois</b></span> ✨
-    `;
+  Score dyalk : <b>${score}/${QUESTIONS.length}</b> 🥳<br><br>
+  <b>Joyeux anniversaire mon amour 🎂❤️</b><br>
+  Kanmtanna lik 3am kbir b lkhir, lfar7a w réussite…<br>
+  <span style="color:var(--accent2)"><b>كنبغيك bzzzzzfffffffff</b></span> ✨
+
+  <div class="final-photo">
+    <img src="assets/lui.jpg" alt="Photo dyalk" />
+  </div>
+  <div class="final-caption">📸 أجمل واحد فهاد الدنيا 😌</div>
+`;
   }
 
   function restart(){
