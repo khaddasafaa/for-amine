@@ -1,62 +1,536 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Happy Birthday ❤️</title>
-<style>
-body {
-    margin:0;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    font-family: 'Arial', sans-serif;
-    color:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    text-align:center;
-}
-.container {
-    animation: fadeIn 2s ease-in-out;
-}
-h1 {
-    font-size: 3em;
-}
-button {
-    padding:15px 30px;
-    font-size:1.2em;
-    border:none;
-    border-radius:30px;
-    background:#ff4b5c;
-    color:white;
-    cursor:pointer;
-}
-button:hover {
-    background:#ff1e40;
-}
-@keyframes fadeIn {
-    from {opacity:0;}
-    to {opacity:1;}
-}
-</style>
-</head>
-<body>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mission Anniversaire 🎂</title>
 
-<div class="container">
-    <h1>Joyeux Anniversaire mon amour 🎂❤️</h1>
-    <p>Tu es la plus belle chose qui me soit arrivée.</p>
-    <button onclick="reveal()">Clique ici 🎁</button>
-    <p id="secret" style="display:none; margin-top:20px;">
-        Même à distance, mon cœur est avec toi.  
-        Que cette nouvelle année t’apporte succès, bonheur et tout l’amour que tu mérites.  
-        Je t’aime infiniment 💫
-    </p>
-</div>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#121a33;
+      --card:#0f1730cc;
+      --txt:#eaf0ff;
+      --muted:#a9b4d6;
+      --accent:#ff4b7d;
+      --accent2:#7cf7d4;
+      --danger:#ff5b5b;
+      --ok:#31f28b;
+      --border:rgba(255,255,255,.12);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 22px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--txt);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(900px 600px at 20% 20%, #2b2bff22, transparent 55%),
+        radial-gradient(800px 520px at 80% 30%, #ff2b7a22, transparent 55%),
+        radial-gradient(900px 680px at 50% 90%, #35ffd322, transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .wrap{
+      width:min(940px, 100%);
+      display:grid;
+      gap:16px;
+    }
+
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    .pill{
+      background: rgba(15, 23, 48, .55);
+      border:1px solid var(--border);
+      border-radius: 999px;
+      padding:10px 14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      white-space:nowrap;
+    }
+
+    .pill b{ letter-spacing:.3px; }
+    .pill .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--accent2);
+      box-shadow: 0 0 18px rgba(124,247,212,.8);
+    }
+
+    .score{
+      font-variant-numeric: tabular-nums;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .score .badge{
+      padding:6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid var(--border);
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
+
+    .header{
+      padding:22px 22px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size: 22px;
+      margin:0;
+    }
+
+    .subtitle{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .content{
+      padding:18px 22px 22px;
+      display:grid;
+      gap:14px;
+    }
+
+    .qmeta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .progress{
+      flex:1;
+      min-width:220px;
+      height:10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+
+    .question{
+      font-size: 20px;
+      line-height:1.3;
+      margin:6px 0 8px;
+    }
+
+    .options{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+
+    @media (max-width:640px){
+      .options{ grid-template-columns: 1fr; }
+    }
+
+    .opt{
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      border-radius: 16px;
+      padding:14px 14px;
+      cursor:pointer;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .opt:hover{
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.2);
+      transform: translateY(-1px);
+    }
+    .opt.selected{
+      outline: 2px solid rgba(255,75,125,.55);
+      background: rgba(255,75,125,.12);
+    }
+    .opt .radio{
+      width:18px; height:18px; border-radius:50%;
+      border:2px solid rgba(255,255,255,.35);
+      margin-top:1px;
+      flex:0 0 auto;
+      display:grid;
+      place-items:center;
+    }
+    .opt.selected .radio{
+      border-color: rgba(255,75,125,.9);
+    }
+    .opt.selected .radio::after{
+      content:"";
+      width:9px; height:9px; border-radius:50%;
+      background: rgba(255,75,125,.95);
+      box-shadow: 0 0 12px rgba(255,75,125,.75);
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:6px;
+    }
+
+    button{
+      border:none;
+      border-radius: 999px;
+      padding:12px 18px;
+      font-size: 15px;
+      cursor:pointer;
+      transition: transform .06s ease, opacity .2s ease;
+      color:var(--txt);
+    }
+    button:active{ transform: translateY(1px); }
+
+    .btn-primary{
+      background: linear-gradient(90deg, var(--accent), #ff8aa6);
+    }
+    .btn-secondary{
+      background: rgba(255,255,255,.09);
+      border:1px solid var(--border);
+    }
+
+    button[disabled]{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .msg{
+      padding:12px 14px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--muted);
+      display:none;
+      line-height:1.35;
+    }
+    .msg.error{
+      border-color: rgba(255,91,91,.35);
+      background: rgba(255,91,91,.10);
+      color: #ffd3d3;
+    }
+    .msg.ok{
+      border-color: rgba(49,242,139,.35);
+      background: rgba(49,242,139,.10);
+      color: #d5ffe9;
+    }
+
+    .final{
+      display:none;
+      padding:22px;
+      text-align:center;
+    }
+    .final h2{
+      margin:0 0 10px;
+      font-size:26px;
+    }
+    .final p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:16px;
+    }
+
+    .spark{
+      display:inline-block;
+      animation: pop .9s ease-in-out infinite alternate;
+    }
+    @keyframes pop{ from{ transform:translateY(0)} to{ transform:translateY(-3px)} }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="pill">
+        <span class="dot"></span>
+        <b>Mission Anniversaire</b>
+        <span style="color:var(--muted)">— niveau “vérité alternative”</span>
+      </div>
+
+      <div class="pill score" aria-live="polite">
+        <span>Score</span>
+        <span class="badge" id="score">0</span>
+        <span style="color:var(--muted)">/</span>
+        <span class="badge" id="maxScore">0</span>
+      </div>
+    </div>
+
+    <div class="card" id="quizCard">
+      <div class="header">
+        <h1 class="title">🎂 Quiz d’anniversaire (ultra sérieux) <span class="spark">✨</span></h1>
+        <p class="subtitle">
+          Règle du jeu : maghatqderch douz la question jaya <b>hta tjaweb shih</b> ma3endek madir hadi hya l9a3ida 😌
+        </p>
+      </div>
+
+      <div class="content">
+        <div class="qmeta">
+          <div style="min-width:160px">
+            Question <b id="qIndex">1</b>/<span id="qTotal">1</span>
+          </div>
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+        </div>
+
+        <div class="question" id="questionText"></div>
+
+        <div class="options" id="options"></div>
+
+        <div class="msg" id="msg"></div>
+
+        <div class="actions">
+          <button class="btn-primary" id="validateBtn" disabled>Valider ✅</button>
+          <button class="btn-secondary" id="nextBtn" style="display:none;">Suivant ➜</button>
+          <button class="btn-secondary" id="restartBtn" style="display:none;">Rejouer 🔁</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card final" id="finalCard">
+      <h2>🎉 Naaaaaaaaaaadi Mission accomplie !</h2>
+      <p id="finalText"></p>
+      <div style="margin-top:16px;">
+        <button class="btn-primary" id="restartBtn2">3awed tl3eb 🔁</button>
+      </div>
+    </div>
+  </div>
 
 <script>
-function reveal() {
-    document.getElementById("secret").style.display = "block";
-}
-</script>
+  /**
+   * Quiz “funny” : les réponses "correctes" sont celles que TOI tu veux.
+   * Pour changer le contenu, modifie uniquement la liste `QUESTIONS`.
+   */
+  const QUESTIONS = [
+    {
+      text: "Ch7al f3amrek ?",
+      options: ["19", "25", "78", "120"],
+      correct: "78",
+      ok: "✅ Exact. 78 ans,okatban sghir 😌✨",
+      nope: "❌ Hmm… non. Ljawaaaab marfouuuuud. Réessaie 😌"
+    },
+    {
+      text: "F achmen 3am tzaditi fih ?",
+      options: ["2001", "1802", "1999", "3026"],
+      correct: "1802",
+      ok: "✅ Ayeeeeh 1802, nta mn zaman Napoleon.",
+      nope: "❌ Non non non… l’administration a tranché : 1802."
+    },
 
+    // Questions fun supplémentaires (tu peux en supprimer/ajouter)
+    {
+      text: "Achno huwa ton super-pouvoir principal ?",
+      options: ["Katn3s 12 sa3a", "Katakol b7al l7alouf", "Manger 7 pizzas", "Téléportation", "zwin obzaf"],
+      correct: "zwin obzaf",
+      ok: "✅ Hadi obvious… nta khatar 3la lbachar 😌🔥.",
+      nope: "❌ Faux. Ma tkounsh modest bzaf daba 😏"
+    },
+      {
+      text: "Achno smit lmalik dyal lmaghrib ?",
+      options: ["Mohammed VI", "Safaa VI", "Messi", "Amine VI"],
+      correct: "Safaa VI",
+      ok: "✅ Hadi hiya l7a9i9a li makay3rfohach nass 😌👑.",
+      nope: "❌ matkounch masmoum 😏"
+    },
+    {
+      text: "Ch7al katwahachni ?",
+      options: ["Chwya", "bzaf", "Bzaf bzaf", "bzzzzzzzzzzzzzzfffffffffffffffff"],
+      correct: "bzzzzzzzzzzzzzzfffffffffffffffff",
+      ok: "✅ Safi le tribunal de l’amour valide.",
+      nope: "❌ Ma t9ssrsh… rah kayna camera 😭"
+    },
+    {
+      text: "Shkun hiya l7ob dyal 7yatk ?",
+      options: ["Safaa", "Safa", "safaaaaaaaaaaaaa", "ChatGPT"],
+      correct: "safaaaaaaaaaaaaa",
+      ok: "✅ Haaaa daba n9edro nkemlo 😌❤️",
+      nope: "❌ Zid f les lettres… mazal ma wsltich 😌"
+    }
+  ];
+
+  const scoreEl = document.getElementById("score");
+  const maxScoreEl = document.getElementById("maxScore");
+  const qIndexEl = document.getElementById("qIndex");
+  const qTotalEl = document.getElementById("qTotal");
+  const barEl = document.getElementById("bar");
+  const questionTextEl = document.getElementById("questionText");
+  const optionsEl = document.getElementById("options");
+  const msgEl = document.getElementById("msg");
+  const validateBtn = document.getElementById("validateBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const restartBtn2 = document.getElementById("restartBtn2");
+
+  const quizCard = document.getElementById("quizCard");
+  const finalCard = document.getElementById("finalCard");
+  const finalText = document.getElementById("finalText");
+
+  let current = 0;
+  let selected = null;
+  let score = 0;
+  let lockedCorrect = false;
+
+  maxScoreEl.textContent = QUESTIONS.length;
+  qTotalEl.textContent = QUESTIONS.length;
+
+  function resetUIForQuestion(){
+    msgEl.style.display = "none";
+    msgEl.className = "msg";
+    validateBtn.disabled = true;
+    nextBtn.style.display = "none";
+    restartBtn.style.display = "none";
+    selected = null;
+    lockedCorrect = false;
+  }
+
+  function render(){
+    const q = QUESTIONS[current];
+    qIndexEl.textContent = (current + 1);
+    const pct = Math.round((current) / QUESTIONS.length * 100);
+    barEl.style.width = pct + "%";
+
+    questionTextEl.textContent = q.text;
+    optionsEl.innerHTML = "";
+
+    q.options.forEach(opt => {
+      const btn = document.createElement("div");
+      btn.className = "opt";
+      btn.setAttribute("role","button");
+      btn.setAttribute("tabindex","0");
+      btn.innerHTML = `
+        <div class="radio"></div>
+        <div><div style="font-weight:600">${opt}</div></div>
+      `;
+
+      const choose = () => {
+        if (lockedCorrect) return; // on bloque la sélection après validation correcte
+        document.querySelectorAll(".opt").forEach(x => x.classList.remove("selected"));
+        btn.classList.add("selected");
+        selected = opt;
+        validateBtn.disabled = false;
+      };
+
+      btn.addEventListener("click", choose);
+      btn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") choose();
+      });
+
+      optionsEl.appendChild(btn);
+    });
+
+    resetUIForQuestion();
+  }
+
+  function showMsg(type, text){
+    msgEl.style.display = "block";
+    msgEl.className = "msg " + type;
+    msgEl.textContent = text;
+  }
+
+  validateBtn.addEventListener("click", () => {
+    const q = QUESTIONS[current];
+    if (!selected) return;
+
+    if (selected === q.correct){
+      // bonne réponse "imposée"
+      if (!lockedCorrect){
+        score += 1;
+        scoreEl.textContent = score;
+      }
+      lockedCorrect = true;
+
+      showMsg("ok", q.ok || "✅ Correct !");
+      nextBtn.style.display = "inline-block";
+
+      // petit effet barre
+      const pct = Math.round(((current + 1) / QUESTIONS.length) * 100);
+      barEl.style.width = pct + "%";
+
+      // on désactive valider une fois que c’est bon
+      validateBtn.disabled = true;
+    } else {
+      showMsg("error", q.nope || "❌ Non… essaie encore.");
+      nextBtn.style.display = "none";
+    }
+  });
+
+  nextBtn.addEventListener("click", () => {
+    current += 1;
+    if (current >= QUESTIONS.length){
+      finish();
+      return;
+    }
+    render();
+  });
+
+  function finish(){
+    quizCard.style.display = "none";
+    finalCard.style.display = "block";
+
+    // Message final
+    finalText.innerHTML = `
+      Ton score final : <b>${score}/${QUESTIONS.length}</b> 🥳<br><br>
+      Joyeux anniversaire mon amour 🎂❤️<br>
+      Je te souhaite une année pleine de bonheur, de réussite, et de moments incroyables. kanmout 3lik azin dyali lahla ykhetik elia oyketbek lia yaaarbi<br>
+      <span style="color:var(--accent2)"><b>Je t’aime bzzzzzzzffff ya aghla ma3endi</b></span> ✨
+    `;
+  }
+
+  function restart(){
+    current = 0;
+    score = 0;
+    selected = null;
+    lockedCorrect = false;
+    scoreEl.textContent = "0";
+    quizCard.style.display = "block";
+    finalCard.style.display = "none";
+    barEl.style.width = "0%";
+    render();
+  }
+
+  restartBtn.addEventListener("click", restart);
+  restartBtn2.addEventListener("click", restart);
+
+  // init
+  render();
+</script>
 </body>
 </html>
