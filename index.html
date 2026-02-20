@@ -36,12 +36,15 @@
       align-items:center;
       justify-content:center;
       padding:20px;
+      overflow-x:hidden;
     }
 
     .wrap{
       width:min(940px, 100%);
       display:grid;
       gap:16px;
+      position:relative;
+      z-index:2;
     }
 
     .topbar{
@@ -93,6 +96,7 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
       overflow:hidden;
+      position:relative;
     }
 
     .header{
@@ -275,10 +279,77 @@
       animation: pop .9s ease-in-out infinite alternate;
     }
     @keyframes pop{ from{ transform:translateY(0)} to{ transform:translateY(-3px)} }
+
+    /* ====== WOW: Overlay "Mission accepted" ====== */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.65);
+      display:grid;
+      place-items:center;
+      z-index:50;
+      backdrop-filter: blur(6px);
+    }
+    .overlay-card{
+      width:min(780px, calc(100% - 28px));
+      border-radius: 26px;
+      border:1px solid var(--border);
+      background: rgba(15,23,48,.82);
+      box-shadow: var(--shadow);
+      padding:24px;
+      text-align:center;
+    }
+    .overlay-card h1{
+      margin:0 0 10px;
+      font-size:28px;
+    }
+    .overlay-card p{
+      margin:0 0 14px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+    .kbd{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ====== Confetti canvas ====== */
+    #confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:40;
+    }
   </style>
 </head>
 
 <body>
+
+<canvas id="confetti"></canvas>
+
+<!-- Overlay start -->
+<div class="overlay" id="startOverlay">
+  <div class="overlay-card">
+    <h1>🕵️‍♂️ MISSION ACCEPTED</h1>
+    <p>
+      Salam a sidi 😌<br>
+      Hadchi <b>quiz dyal l3id ميلاد</b>… walakin b “vérité alternative”.<br>
+      Ghadi tجاوب، w <b>ma t9derch douz</b> hta tjaweb “shih” 😈
+    </p>
+    <p style="margin-top:10px;">
+      Tip: ila bghiti l-sound khdem, khassk tklik 3la button (7it browser).
+    </p>
+    <button class="btn-primary" id="startBtn">🚀 بدا المهمة</button>
+    <div style="margin-top:10px;color:var(--muted);font-size:13px;">
+      Mode: <span class="kbd">FUN</span> | Score kaytla3 f lfo9
+    </div>
+  </div>
+</div>
+
   <div class="wrap">
     <div class="topbar">
       <div class="pill">
@@ -335,57 +406,57 @@
   </div>
 
 <script>
-  /**
-   * Quiz “funny” : les réponses "correctes" sont celles que TOI tu veux.
-   * Pour changer le contenu, modifie uniquement la liste `QUESTIONS`.
-   */
+  // ========= SETTINGS =========
+  // إذا بغيتي "إلا غلط يرجع من اللول" خليه true
+  const HARD_MODE_RESTART_ON_WRONG = false;
+
+  // ========= QUESTIONS (darija) =========
   const QUESTIONS = [
     {
       text: "Ch7al f3amrek ?",
       options: ["19", "25", "78", "120"],
       correct: "78",
-      ok: "✅ Exact. 78 ans,okatban sghir 😌✨",
-      nope: "❌ Hmm… non. Ljawaaaab marfouuuuud. Réessaie 😌"
+      ok: "✅ Exact! 78 3am… w katbban sghir 😌✨",
+      nope: "❌ Ljawaaaab marfouuuuud… 3awed jarrab 😌"
     },
     {
       text: "F achmen 3am tzaditi fih ?",
       options: ["2001", "1802", "1999", "3026"],
       correct: "1802",
-      ok: "✅ Ayeeeeh 1802, nta mn zaman Napoleon.",
-      nope: "❌ Non non non… l’administration a tranché : 1802."
+      ok: "✅ Ayeeeh 1802… nta mn zaman Napoleon 😌😂",
+      nope: "❌ Non non… l'administration galat: 1802 😌"
     },
-
-    // Questions fun supplémentaires (tu peux en supprimer/ajouter)
     {
-      text: "Achno huwa ton super-pouvoir principal ?",
-      options: ["Katn3s 12 sa3a", "Katakol b7al l7alouf", "Manger 7 pizzas", "Téléportation", "zwin obzaf"],
-      correct: "zwin obzaf",
-      ok: "✅ Hadi obvious… nta khatar 3la lbachar 😌🔥.",
-      nope: "❌ Faux. Ma tkounsh modest bzaf daba 😏"
+      text: "Achno huwa super-pouvoir dyalk ?",
+      options: ["Katn3s 12 sa3a", "Katakol b7al l7alouf", "Katdir téléportation", "Zwin o bzaf"],
+      correct: "Zwin o bzaf",
+      ok: "✅ Hadi obvious… nta khatar 3la lbachar 😌🔥",
+      nope: "❌ Ma tkounsh modest bzaf… jawb sah 😏"
     },
-      {
+    {
       text: "Achno smit lmalik dyal lmaghrib ?",
       options: ["Mohammed VI", "Safaa VI", "Messi", "Amine VI"],
       correct: "Safaa VI",
-      ok: "✅ Hadi hiya l7a9i9a li makay3rfohach nass 😌👑.",
-      nope: "❌ matkounch masmoum 😏"
+      ok: "✅ Hadi hiya l7a9i9a li makay3rfohach nass 😌👑",
+      nope: "❌ La la… lmalika hna 😌"
     },
     {
       text: "Ch7al katwahachni ?",
-      options: ["Chwya", "bzaf", "Bzaf bzaf", "bzzzzzzzzzzzzzzfffffffffffffffff"],
-      correct: "bzzzzzzzzzzzzzzfffffffffffffffff",
-      ok: "✅ Safi le tribunal de l’amour valide.",
-      nope: "❌ Ma t9ssrsh… rah kayna camera 😭"
+      options: ["Chwiya", "Bzaf", "Bzaf bzaf", "Hadi jarima 3alamia"],
+      correct: "Hadi jarima 3alamia",
+      ok: "✅ Safi… tribunal dyal l7ob valide 😌❤️",
+      nope: "❌ Ma t9ssrsh… 7awl tkon صادق 😭"
     },
     {
       text: "Shkun hiya l7ob dyal 7yatk ?",
       options: ["Safaa", "Safa", "safaaaaaaaaaaaaa", "ChatGPT"],
       correct: "safaaaaaaaaaaaaa",
-      ok: "✅ Haaaa daba n9edro nkemlo 😌❤️",
-      nope: "❌ Zid f les lettres… mazal ma wsltich 😌"
+      ok: "✅ Voilààà… daba n9edro nkemlo 😌❤️",
+      nope: "❌ Zid f les lettres… mazal 😌"
     }
   ];
 
+  // ========= DOM =========
   const scoreEl = document.getElementById("score");
   const maxScoreEl = document.getElementById("maxScore");
   const qIndexEl = document.getElementById("qIndex");
@@ -403,6 +474,10 @@
   const finalCard = document.getElementById("finalCard");
   const finalText = document.getElementById("finalText");
 
+  const startOverlay = document.getElementById("startOverlay");
+  const startBtn = document.getElementById("startBtn");
+
+  // ========= STATE =========
   let current = 0;
   let selected = null;
   let score = 0;
@@ -411,6 +486,91 @@
   maxScoreEl.textContent = QUESTIONS.length;
   qTotalEl.textContent = QUESTIONS.length;
 
+  // ========= Tiny sounds (WebAudio) =========
+  let audioCtx = null;
+  function beep(freq=700, duration=0.08, type="sine", gain=0.05){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.value = freq;
+      g.gain.value = gain;
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + duration);
+    }catch(e){
+      // If blocked, ignore.
+    }
+  }
+  function successSound(){
+    beep(660, 0.07, "triangle", 0.06);
+    setTimeout(()=>beep(880, 0.09, "triangle", 0.06), 80);
+  }
+  function errorSound(){
+    beep(220, 0.10, "sawtooth", 0.04);
+  }
+
+  // ========= Confetti =========
+  const confettiCanvas = document.getElementById("confetti");
+  const ctx = confettiCanvas.getContext("2d");
+  let confetti = [];
+  let confettiRAF = null;
+
+  function resizeCanvas(){
+    confettiCanvas.width = window.innerWidth * devicePixelRatio;
+    confettiCanvas.height = window.innerHeight * devicePixelRatio;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function spawnConfetti(count=80){
+    const w = confettiCanvas.width;
+    const h = confettiCanvas.height;
+    for(let i=0;i<count;i++){
+      confetti.push({
+        x: Math.random() * w,
+        y: -20 * devicePixelRatio,
+        vx: (Math.random() - 0.5) * 2.8 * devicePixelRatio,
+        vy: (Math.random() * 2.5 + 3.0) * devicePixelRatio,
+        r: (Math.random() * 6 + 4) * devicePixelRatio,
+        a: Math.random() * Math.PI * 2,
+        va: (Math.random() - 0.5) * 0.2,
+        life: Math.random() * 80 + 80
+      });
+    }
+    if(!confettiRAF) animateConfetti();
+  }
+
+  function animateConfetti(){
+    confettiRAF = requestAnimationFrame(animateConfetti);
+    ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+
+    confetti.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      p.a += p.va;
+      p.vy *= 0.995;
+      p.life -= 1;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life/160));
+      ctx.fillStyle = `hsl(${(p.x/8)%360}, 90%, 65%)`;
+      ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*0.6);
+      ctx.restore();
+    });
+
+    confetti = confetti.filter(p => p.life > 0 && p.y < confettiCanvas.height + 50*devicePixelRatio);
+    if(confetti.length === 0){
+      cancelAnimationFrame(confettiRAF);
+      confettiRAF = null;
+    }
+  }
+
+  // ========= UI helpers =========
   function resetUIForQuestion(){
     msgEl.style.display = "none";
     msgEl.className = "msg";
@@ -441,11 +601,12 @@
       `;
 
       const choose = () => {
-        if (lockedCorrect) return; // on bloque la sélection après validation correcte
+        if (lockedCorrect) return;
         document.querySelectorAll(".opt").forEach(x => x.classList.remove("selected"));
         btn.classList.add("selected");
         selected = opt;
         validateBtn.disabled = false;
+        beep(520, 0.04, "sine", 0.03);
       };
 
       btn.addEventListener("click", choose);
@@ -470,25 +631,33 @@
     if (!selected) return;
 
     if (selected === q.correct){
-      // bonne réponse "imposée"
       if (!lockedCorrect){
         score += 1;
         scoreEl.textContent = score;
       }
       lockedCorrect = true;
 
+      successSound();
+      spawnConfetti(70);
+
       showMsg("ok", q.ok || "✅ Correct !");
       nextBtn.style.display = "inline-block";
 
-      // petit effet barre
       const pct = Math.round(((current + 1) / QUESTIONS.length) * 100);
       barEl.style.width = pct + "%";
 
-      // on désactive valider une fois que c’est bon
       validateBtn.disabled = true;
     } else {
+      errorSound();
       showMsg("error", q.nope || "❌ Non… essaie encore.");
       nextBtn.style.display = "none";
+
+      if (HARD_MODE_RESTART_ON_WRONG){
+        setTimeout(() => {
+          restart();
+          showMsg("error", "😈 HARD MODE: ghlti… رجعتي من اللول!");
+        }, 450);
+      }
     }
   });
 
@@ -504,13 +673,14 @@
   function finish(){
     quizCard.style.display = "none";
     finalCard.style.display = "block";
+    successSound();
+    spawnConfetti(220);
 
-    // Message final
     finalText.innerHTML = `
-      Ton score final : <b>${score}/${QUESTIONS.length}</b> 🥳<br><br>
-      Joyeux anniversaire mon amour 🎂❤️<br>
-      Je te souhaite une année pleine de bonheur, de réussite, et de moments incroyables. kanmout 3lik azin dyali lahla ykhetik elia oyketbek lia yaaarbi<br>
-      <span style="color:var(--accent2)"><b>Je t’aime bzzzzzzzffff ya aghla ma3endi</b></span> ✨
+      Score dyalk : <b>${score}/${QUESTIONS.length}</b> 🥳<br><br>
+      <b>Joyeux anniversaire mon amour 🎂❤️</b><br>
+      Kanmtanna lik 3am kbir b lkhir, lfar7a w réussite…<br>
+      <span style="color:var(--accent2)"><b>كنبغيك safaaaaaaaaaaaaa fois</b></span> ✨
     `;
   }
 
@@ -529,8 +699,16 @@
   restartBtn.addEventListener("click", restart);
   restartBtn2.addEventListener("click", restart);
 
-  // init
-  render();
+  // Start overlay
+  startBtn.addEventListener("click", () => {
+    // create audio context on user gesture
+    beep(620, 0.06, "triangle", 0.05);
+    startOverlay.style.display = "none";
+    render();
+  });
+
+  // init (wait for start)
+  barEl.style.width = "0%";
 </script>
 </body>
 </html>
